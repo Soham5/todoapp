@@ -1,124 +1,113 @@
-import logo from './logo.svg';
-import React,{useEffect, useState} from 'react'
-import { MdDeleteOutline  } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
+import React, { useEffect, useState } from 'react';
+import ProgressBar from './components/ProgressBar';
+import DailyTodoList from './components/DailyTodoList';
+import { getProgressStats } from './utils/progressCalculator';
 import './App.css';
 
 function App() {
-  const [isCompleteScreen, setIsCompleteScreen] = useState(false);
-  const [allTodos, setTodos] = useState([])
-  const [newTitle, setNewTitle] = useState();
-  const [newDesc, setNewDesc] = useState();
-  const [completedTodos, setCompletedTodos] = useState([])
+  const [allTodos, setTodos] = useState([]);
+  const [completedTodos, setCompletedTodos] = useState([]);
 
-  const addDailyTodo = () => {
-    let newTodoItem = {
-      title:newTitle,
-      desc:newDesc
-    }
-
-    let updatedTodoItems = [...allTodos];
-    updatedTodoItems.push(newTodoItem);
-    setTodos(updatedTodoItems);
-    localStorage.setItem('todolist',JSON.stringify(updatedTodoItems));
-  };
-
-  const deleteDailyTodo = (index) => {
-    let reducedTodo = [...allTodos];
-    reducedTodo.splice(index,1);
-    localStorage.setItem('todolist',JSON.stringify(reducedTodo));
-    setTodos(reducedTodo);
-  };
-
-  const completeDailyTodo = (index) => {
-    let currentDateTime = new Date();
-    let completedOn = currentDateTime.getHours() + ':' + currentDateTime.getMinutes() +':' +currentDateTime.getSeconds();
-    
-    let filteredItems = {
-      ...allTodos[index],
-      completedAt:completedOn
-    }
-    
-    let updatedCompleteArr = [...completedTodos]
-    updatedCompleteArr.push(filteredItems)
-    console.log(updatedCompleteArr);
-    setCompletedTodos(updatedCompleteArr);
-    localStorage.setItem('completedTodolist',JSON.stringify(updatedCompleteArr));
-    deleteDailyTodo(index)
+  const clearDaily = () => {
+    setTodos([]);
+    setCompletedTodos([]);
+    localStorage.removeItem('todolist');
+    localStorage.removeItem('completedTodolist');
+    localStorage.setItem('todoDate', new Date().toDateString());
   };
 
   useEffect(() => {
-    let savedTodo = JSON.parse(localStorage.getItem('todolist'));
-    if(savedTodo) {
-      setTodos(savedTodo);
+    const savedDate = localStorage.getItem('todoDate');
+    const today = new Date().toDateString();
+
+    if (savedDate !== today) {
+      clearDaily();
+      return;
     }
-  },[])
+
+    const savedTodo = JSON.parse(localStorage.getItem('todolist'));
+    const savedCompleted = JSON.parse(localStorage.getItem('completedTodolist'));
+    if (savedTodo) setTodos(savedTodo);
+    if (savedCompleted) setCompletedTodos(savedCompleted);
+  }, []);
+
+  // Check for midnight rollover while the app is open
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const msUntilMidnight = tomorrow - now;
+
+    const timer = setTimeout(() => {
+      clearDaily();
+    }, msUntilMidnight);
+
+    return () => clearTimeout(timer);
+  });
+
+  const addTodo = (newItem) => {
+    const updated = [...allTodos, newItem];
+    setTodos(updated);
+    localStorage.setItem('todolist', JSON.stringify(updated));
+    if (!localStorage.getItem('todoDate')) {
+      localStorage.setItem('todoDate', new Date().toDateString());
+    }
+  };
+
+  const deleteTodo = (index) => {
+    const updated = allTodos.filter((_, i) => i !== index);
+    setTodos(updated);
+    localStorage.setItem('todolist', JSON.stringify(updated));
+  };
+
+  const completeTodo = (index) => {
+    const now = new Date();
+    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const completed = { ...allTodos[index], completedAt: time };
+
+    const updatedCompleted = [...completedTodos, completed];
+    setCompletedTodos(updatedCompleted);
+    localStorage.setItem('completedTodolist', JSON.stringify(updatedCompleted));
+
+    deleteTodo(index);
+  };
+
+  const deleteCompleted = (index) => {
+    const updated = completedTodos.filter((_, i) => i !== index);
+    setCompletedTodos(updated);
+    localStorage.setItem('completedTodolist', JSON.stringify(updated));
+  };
+
+  const stats = getProgressStats(allTodos, completedTodos);
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
 
   return (
-    <div className="App">
-      <h1>Daily TODO</h1>
-      <div className="todo-wrapper">
-        
-        <div className="todo-input">
-
-          <div className="todo-input-item">
-            <label>Title</label>
-            <input type="text" value={newTitle} onChange={(e)=>setNewTitle(e.target.value)} placeholder="Task's Title"/>
-          </div>
-
-          <div className="todo-input-item">
-            <label>Description</label>
-            <input type="text" value={newDesc} onChange={(e)=>setNewDesc(e.target.value)} placeholder="Task's Description"/>
-          </div>
-
-          <div className="todo-input-item">
-            <button type="button" className="primaryBtn" onClick={addDailyTodo}>Add</button>
-          </div>
-
+    <div className="app">
+      <header className="app-header">
+        <div>
+          <h1 className="app-title">Daily Planner</h1>
+          <p className="app-date">{today}</p>
         </div>
+      </header>
 
-        <div className="btn-area">
-          <button className={`secondaryBtn ${isCompleteScreen===false && 'active'}`} onClick={()=>setIsCompleteScreen(false)}>TODO</button>
-          <button className={`secondaryBtn ${isCompleteScreen===true && 'active'}`} onClick={()=>setIsCompleteScreen(true)}>Completed</button>
-        </div>
+      <main className="app-main">
+        <ProgressBar stats={stats} />
+        <DailyTodoList
+          allTodos={allTodos}
+          completedTodos={completedTodos}
+          onAdd={addTodo}
+          onDelete={deleteTodo}
+          onComplete={completeTodo}
+          onDeleteCompleted={deleteCompleted}
+        />
+      </main>
 
-        <div className="todo-list">
-
-         {isCompleteScreen===false && allTodos.map((item, index)=> {
-          return (
-            <div className="todo-list-item" key={index}>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.desc}</p>
-              </div>
-
-              <div>
-                <MdDeleteOutline className="icon delete" onClick={()=>deleteDailyTodo(index)}/>
-                <FaCheck className='icon check' onClick={()=>completeDailyTodo(index)}/>
-              </div>
-          </div>
-          )
-         })}
-
-          {isCompleteScreen===true && completedTodos.map((item, index)=> {
-           return (
-            <div className="todo-list-item" key={index}>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.desc}</p>
-                <p>Completed at: {item.completedAt}</p>
-              </div>
-          </div>
-          )
-         })}
-
-        </div>
-
-      </div>
-
-      <div class="copyright">
-        <p>© 2025 <a href="https://www.sohamsur.com/">Soham Sur</a></p>
-      </div>
+      <footer className="copyright">
+        <p>&copy; 2025 <a href="https://www.sohamsur.com/">Soham Sur</a></p>
+      </footer>
     </div>
   );
 }

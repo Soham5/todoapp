@@ -1,172 +1,458 @@
-/* .App {
-  text-align: center;
-} */
-body {
-  background-color: #1f1e1e;
-  color: white;
-  overflow: hidden;
+/* ========== ROOT VARIABLES ========== */
+:root {
+  --bg-primary: #0f0f10;
+  --bg-secondary: #1a1a1d;
+  --bg-card: #222226;
+  --bg-card-hover: #2a2a2f;
+  --bg-input: #2c2c31;
+  --accent: #00e67a;
+  --accent-hover: #00c468;
+  --accent-glow: rgba(0, 230, 122, 0.15);
+  --danger: #ff4757;
+  --danger-hover: #e0303f;
+  --text-primary: #f0f0f2;
+  --text-secondary: #9a9aab;
+  --text-muted: #636375;
+  --border: #2e2e35;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --transition: 0.2s ease;
 }
 
-.todo-wrapper {
-  background-color: #353434;
-  padding: 2%;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 3%,;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0px 5px 7px rgb(27, 27, 27);
-}
-
-h1{
-  text-align: center;
-}
-
-.todo-input {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid rgb(78, 78, 78);
-  padding-bottom: 25px;
-  margin-bottom: 25px;
-}
-
-.todo-input-item {
+/* ========== LAYOUT ========== */
+.app {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  margin-right: 25px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.todo-input-item label {
-  font-weight: bold;
-  margin-bottom: 10px;
+/* ========== HEADER ========== */
+.app-header {
+  padding: 32px 0 8px;
 }
 
-.todo-input-item input {
-  padding: 8px;
-  border: none;
-  width: 250px;
+.app-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
-.todo-input-item input:focus {
-  outline: 2px solid rgb(0, 230, 122)
+.app-date {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 4px 0 0;
 }
 
-.primaryBtn {
-  background-color: rgb(0, 230, 122);
-  color: white;
-  border: none;
-  border-radius: 0px;
-  margin-top: 25px;
-  padding: 10px;
-  width: 60px;
-  cursor: pointer;
+/* ========== MAIN ========== */
+.app-main {
+  flex: 1;
+  padding-bottom: 80px;
 }
 
-.primaryBtn:hover {
-  background-color: rgb(4, 196 , 106);
+/* ========== PROGRESS SECTION ========== */
+.progress-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 20px 0;
 }
 
-.secondaryBtn {
-  background-color: rgb(71 , 71 , 71);
-  color: white;
-  border: none;
-  border-radius: 0px;
-  margin-top: 25px;
-  padding: 10px;
-  width: fit-content;
-  cursor: pointer;
-}
-
-.active {
-  background-color: rgb(4, 196 , 106);
-}
-
-.todo-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.btn-area {
-  margin-bottom: 15px;
-}
-
-.todo-list-item {
-  background-color: #414040;
+.progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  margin-bottom: 10px;
-  box-shadow: 0px 3px 5px rgb(43, 42, 42);
+  margin-bottom: 16px;
 }
 
-.todo-list-item h3 {
-  font-size: 25px;
-  color: rgb(0, 230, 122);
-  font-weight: bold;
+.progress-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
-  margin-top: 5px;
 }
 
-.todo-list-item p {
-  font-size: 14px;
-  color: rgb(161, 161, 161);
-  margin-top: 3px;
+.progress-percentage {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
 }
 
-.icon {
-  font-size: 35px;
-  color: white;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.icon.delete:hover {
-  color: rgb(248, 45, 45);
-}
-
-.icon.check:hover {
-  color: rgb(53, 221, 143);
-}
-
-.copyright {
+.progress-bar-track {
   width: 100%;
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #00d4aa);
+  border-radius: 100px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.progress-message {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 12px 0 16px;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-number.stat-pending {
+  color: #ffa726;
+}
+
+.stat-number.stat-completed {
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========== TODO INPUT ========== */
+.todo-section {
+  margin-top: 8px;
+}
+
+.todo-input-area {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+  transition: border-color var(--transition);
+  box-sizing: border-box;
+}
+
+.todo-input::placeholder {
+  color: var(--text-muted);
+}
+
+.todo-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.todo-input--desc {
+  font-size: 13px;
+  padding: 10px 16px;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+
+.add-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.add-btn svg {
+  font-size: 18px;
+}
+
+/* ========== TABS ========== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin: 24px 0 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--text-secondary);
+}
+
+.tab-btn--active {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.tab-badge {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.tab-btn--active .tab-badge {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+.tab-badge--done {
+  background: var(--accent-glow) !important;
+  color: var(--accent) !important;
+}
+
+/* ========== TASK LIST ========== */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ========== TASK CARD ========== */
+.task-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  transition: all var(--transition);
+}
+
+.task-card:hover {
+  background: var(--bg-card-hover);
+  border-color: #3a3a42;
+}
+
+.task-card--completed {
+  opacity: 0.7;
+}
+
+.task-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-number {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 24px;
+}
+
+.task-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-card--completed .task-title {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.task-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 4px 0 0 34px;
+}
+
+.task-completed-time {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.task-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 18px;
+}
+
+.action-btn--complete:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.action-btn--delete:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(255, 71, 87, 0.1);
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
   text-align: center;
-  padding: 5px 0;
-  background: #262626;
-  font-weight: 300;
-  margin-top: 20px;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state p {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 4px;
+  color: var(--text-secondary);
+}
+
+.empty-state span {
+  font-size: 13px;
+}
+
+/* ========== FOOTER ========== */
+.copyright {
   position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 12px 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  font-size: 13px;
 }
 
 .copyright p {
-  margin: 8px;
+  margin: 0;
+  color: var(--text-muted);
 }
 
-.copyright p a{
+.copyright a {
+  color: var(--text-secondary);
   text-decoration: none;
-  color: #fff;
+  transition: color var(--transition);
 }
 
+.copyright a:hover {
+  color: var(--accent);
+}
 
-@media only screen and (max-width: 600px){
-  body {
-    background-color: lavender;
-    color: white;
-    overflow: hidden;
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+  .app {
+    padding: 0 16px;
   }
 
-  .copyright{
-    font-size: 14px;
-    position: fixed;
-    bottom: 0;
+  .app-title {
+    font-size: 22px;
+  }
+
+  .todo-input-area {
+    flex-direction: column;
+  }
+
+  .add-btn {
     width: 100%;
+    justify-content: center;
+    padding: 12px;
   }
-  
+
+  .progress-stats {
+    gap: 16px;
+  }
+
+  .task-card {
+    padding: 12px 16px;
+  }
+
+  .task-desc {
+    margin-left: 0;
+  }
 }

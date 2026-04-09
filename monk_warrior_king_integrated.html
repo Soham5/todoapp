@@ -1,0 +1,292 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary)}
+.wrap{padding:10px 0}
+.tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s}
+.tab:hover{color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.tab.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+.phase{border-radius:var(--border-radius-lg);margin-bottom:10px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.phase-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none}
+.phase-hdr:hover{filter:brightness(.97)}
+.phase-icon{font-size:18px;line-height:1}
+.phase-meta{flex:1}
+.phase-name{font-size:14px;font-weight:500}
+.phase-sub{font-size:11px;margin-top:1px}
+.phase-time{font-size:11px;font-weight:500;white-space:nowrap;opacity:.8}
+.phase-chv{font-size:10px;opacity:.5;margin-left:6px;transition:transform .2s}
+.phase-chv.open{transform:rotate(180deg)}
+.phase-body{display:none;border-top:0.5px solid}
+.phase-body.open{display:block}
+/* Monk */
+.ph-monk .phase-hdr{background:#EEEDFE} .ph-monk .phase-name{color:#3C3489} .ph-monk .phase-sub{color:#7F77DD} .ph-monk .phase-time{color:#534AB7}
+.ph-monk .phase-body{border-color:#AFA9EC;background:var(--color-background-primary)}
+/* Warrior */
+.ph-war .phase-hdr{background:#FAECE7} .ph-war .phase-name{color:#712B13} .ph-war .phase-sub{color:#D85A30} .ph-war .phase-time{color:#993C1D}
+.ph-war .phase-body{border-color:#F0997B;background:var(--color-background-primary)}
+/* King */
+.ph-king .phase-hdr{background:#FAEEDA} .ph-king .phase-name{color:#633806} .ph-king .phase-sub{color:#BA7517} .ph-king .phase-time{color:#854F0B}
+.ph-king .phase-body{border-color:#FAC775;background:var(--color-background-primary)}
+/* items */
+.item{display:flex;gap:10px;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background .1s}
+.item:last-child{border-bottom:none}
+.item:hover{background:var(--color-background-secondary)}
+.item.active-item{background:var(--color-background-secondary)}
+.item-time{font-size:11px;font-weight:500;color:var(--color-text-secondary);min-width:46px;padding-top:2px;white-space:nowrap}
+.item-main{flex:1}
+.item-title{font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.item-detail{font-size:12px;color:var(--color-text-secondary);line-height:1.55;margin-top:4px;display:none}
+.item-detail.open{display:block}
+.tag{display:inline-block;font-size:10px;font-weight:500;padding:1px 7px;border-radius:10px;line-height:1.7;white-space:nowrap}
+.tg-supp{background:#FAEEDA;color:#633806}
+.tg-gym{background:#EEEDFE;color:#3C3489}
+.tg-trade{background:#E1F5EE;color:#085041}
+.tg-work{background:#E6F1FB;color:#0C447C}
+.tg-mba{background:#FAECE7;color:#712B13}
+.tg-kegel{background:#FAECE7;color:#993C1D}
+.tg-warn{background:#FCEBEB;color:#791F1F}
+.tg-rest{background:#F1EFE8;color:#444441}
+.sub-block{margin-top:8px;border-radius:var(--border-radius-md);overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.sub-hdr{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-secondary);padding:5px 10px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.sub-row{display:flex;justify-content:space-between;padding:4px 10px;font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.sub-row:last-child{border-bottom:none}
+.sub-row span:first-child{color:var(--color-text-primary)}
+.sub-row span:last-child{color:var(--color-text-secondary)}
+.mantras{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.mantra{font-size:10px;padding:3px 9px;border-radius:12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.sleep-bar{margin-top:8px;padding:8px 12px;border-radius:var(--border-radius-md);background:linear-gradient(90deg,#26215C,#042C53);color:#CECBF6;font-size:11px;line-height:1.6}
+.sleep-title{font-size:12px;font-weight:500;color:#fff;margin-bottom:3px}
+.day-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:500;margin-bottom:10px}
+.db-train{background:#EEEDFE;color:#3C3489}
+.db-rest{background:#F1EFE8;color:#444441}
+</style>
+<div class="wrap">
+<div class="tabs" id="tabs"></div>
+<div id="content"></div>
+</div>
+<script>
+const WORKOUT={
+ Mon:{title:"Push A",groups:[
+  {g:"Chest",ex:[["Flat barbell bench","4×6-8"],["Incline DB press","3×10-12"],["Cable fly","3×12-15"]]},
+  {g:"Shoulders",ex:[["Overhead press","4×8-10"],["Lateral raises","3×12-15"]]},
+  {g:"Triceps",ex:[["Tricep pushdown","3×12-15"],["Overhead extension","2×15"]]},
+  {g:"Core",ex:[["Plank","3×60s"],["Ab wheel","3×12"]]}]},
+ Tue:{title:"Pull A",groups:[
+  {g:"Back",ex:[["Deadlift","4×5"],["Barbell row","4×8-10"],["Lat pulldown","3×10-12"]]},
+  {g:"Biceps",ex:[["Barbell curl","3×10-12"],["Hammer curl","2×12-15"]]},
+  {g:"Rear delts",ex:[["Face pulls","3×15-20"]]},
+  {g:"Core",ex:[["Hanging leg raise","3×12"],["Russian twist","2×20"]]}]},
+ Wed:{title:"Legs A",groups:[
+  {g:"Quads / Glutes",ex:[["Barbell squat","4×6-8"],["Leg press","3×10-12"],["Leg extension","3×12-15"]]},
+  {g:"Hamstrings",ex:[["Romanian deadlift","4×8-10"],["Leg curl","3×12"]]},
+  {g:"Calves",ex:[["Standing calf raise","4×15-20"]]},
+  {g:"Core",ex:[["Cable woodchop","3×12"],["Pallof press","2×15"]]}]},
+ Fri:{title:"Push B",groups:[
+  {g:"Chest",ex:[["Low-incline DB press","4×8-10"],["Machine chest press","3×12-15"],["Pec deck","3×15"]]},
+  {g:"Shoulders",ex:[["Arnold press","4×10-12"],["Upright row","3×12"],["Front raise","2×15"]]},
+  {g:"Triceps",ex:[["Close-grip bench","3×10-12"],["Skull crushers","2×12"]]},
+  {g:"Core",ex:[["Decline sit-up","3×15"],["Side plank","2×45s each"]]}]},
+ Sat:{title:"Pull B + Posterior",groups:[
+  {g:"Back",ex:[["Weighted pull-up","4×6-8"],["Seated cable row","4×10-12"],["Single-arm DB row","3×10"]]},
+  {g:"Biceps",ex:[["Incline DB curl","3×12"],["Preacher curl","2×12-15"]]},
+  {g:"Posterior",ex:[["Good morning","3×12"],["Glute-ham raise","3×10"]]},
+  {g:"Calves",ex:[["Seated calf raise","3×20"]]}]}
+};
+const KEGEL=[["Fast-twitch burst (1s on/off)","3×20 reps"],["Long hold (10s on/off)","3×10 reps"],["Elevator ramp (5-count up/down)","2×8 reps"],["Flutter (rapid)","2×30s"]];
+
+const DAYS=[
+ {id:"Mon",label:"Mon",rest:false,sun:false,trade:true},
+ {id:"Tue",label:"Tue",rest:false,sun:false,trade:true},
+ {id:"Wed",label:"Wed",rest:false,sun:false,trade:true},
+ {id:"Thu",label:"Thu",rest:true,sun:false,trade:true},
+ {id:"Fri",label:"Fri",rest:false,sun:false,trade:true},
+ {id:"Sat",label:"Sat",rest:false,sun:false,trade:false},
+ {id:"Sun",label:"Sun",rest:true,sun:true,trade:false}
+];
+
+function subBlock(title,rows){
+ return `<div class="sub-block"><div class="sub-hdr">${title}</div>${rows.map(([a,b])=>`<div class="sub-row"><span>${a}</span><span>${b}</span></div>`).join("")}</div>`;
+}
+function gymDetail(day){
+ const w=WORKOUT[day.id];
+ if(!w)return"";
+ let html=subBlock("Warm-up 10 min — Kegel set 1 here",
+  [["Dynamic mobility (hip circles, shoulder rolls, leg swings)","5 min"],["Activation (glute bridge, band pull-apart)","3 min"],["Ramp-up sets on first compound","2 min"]]);
+ w.groups.forEach(g=>{html+=subBlock(g.g,g.ex);});
+ html+=subBlock("Cool-down 5 min — Kegel set 2 here",
+  [["Static stretching (target muscles trained)","3 min"],["Diaphragmatic breathing","2 min"]]);
+ return html;
+}
+function kegelDetail(){
+ return subBlock("Split across warm-up + cool-down — breathe normally throughout",KEGEL);
+}
+
+function makeItem(time,title,tags,detail,isOpen){
+ const uid="i"+Math.random().toString(36).slice(2);
+ const tagHtml=tags.map(([t,cls])=>`<span class="tag ${cls}">${t}</span>`).join("");
+ return `<div class="item${isOpen?" active-item":""}" onclick="toggleItem('${uid}')">
+  <div class="item-time">${time}</div>
+  <div class="item-main">
+   <div class="item-title">${title} ${tagHtml}</div>
+   <div class="item-detail${isOpen?" open":""}" id="${uid}">${detail}</div>
+  </div>
+ </div>`;
+}
+
+function renderDay(day){
+ const isRest=day.rest,isSun=day.sun,isTrade=day.trade,hasGym=!!WORKOUT[day.id];
+ let html=`<div class="day-badge ${isRest?"db-rest":"db-train"}">${isRest?"Rest & recovery day":"Training day · "+WORKOUT[day.id].title}</div>`;
+
+ // ─── MONK ───────────────────────────────────────────────────
+ const monkUid="monk"+day.id;
+ let monk="";
+ monk+=makeItem("5:00","Wake — no phone, no screen",[],
+  `First action defines the day's frequency. Silence is non-negotiable. Phone stays face-down until Warrior phase begins.`,false);
+ monk+=makeItem("5:05","Shilajit + Gokshura — Dose 1",[["Supplement","tg-supp"]],
+  `<b>Shilajit:</b> 300–500 mg resin dissolved in warm full-fat milk. Empty stomach = peak fulvic acid absorption.<br>
+  <b>Gokshura Dose 1:</b> 250 mg tablet alongside.<br>
+  <i>Do NOT use chlorinated tap water — degrades fulvic acid. Warm milk or filtered water only.</i>`,false);
+ monk+=makeItem("5:15","Meditation + Pranayama",[],
+  `20 min minimum. Anulom vilom → box breathing → 5 min silence.<br>
+  Cortisol hits peak at 5–8 AM — this is your counter-move. Do not skip.`,false);
+ monk+=makeItem("5:40","Journaling — 3 pages raw",[],
+  `Intentions for the day · 1 gratitude · 1 fear to face. No editing, no rereading.`,false);
+ monk+=makeItem("6:15",`Deep learning block`,[["MBA","tg-mba"]],
+  `Strategic Management (MBA ZG611) / Consulting & People Skills (ZG515). Brain is sharpest now — no emails, no markets yet.`,false);
+ monk+=makeItem("7:30","Cold shower → Gokshura-timed transition",[],
+  `Cold 2 min → warm. Ends the monk phase. Physical transition signal to Warrior mode.`,false);
+
+ html+=`<div class="phase ph-monk" id="ph-monk-${day.id}">
+  <div class="phase-hdr" onclick="togglePhase('ph-monk-${day.id}')">
+   <div class="phase-icon">🧘</div>
+   <div class="phase-meta"><div class="phase-name">Monk</div><div class="phase-sub">Stillness · Clarity · Inner mastery</div></div>
+   <div class="phase-time">5:00–8:30 AM</div>
+   <span class="phase-chv open" id="chv-ph-monk-${day.id}">▼</span>
+  </div>
+  <div class="phase-body open" id="body-ph-monk-${day.id}">${monk}
+   <div style="padding:8px 14px 10px">
+    <div class="mantras"><span class="mantra">no social media</span><span class="mantra">no news</span><span class="mantra">no notifications</span><span class="mantra">silence is the tool</span></div>
+   </div>
+  </div>
+ </div>`;
+
+ // ─── WARRIOR ───────────────────────────────────────────────
+ let war="";
+ if(hasGym){
+  war+=makeItem("8:30",`Gym — ${WORKOUT[day.id].title}`,[["Body","tg-gym"],["Kegel","tg-kegel"]],
+   `Testosterone peaks 9–10 AM. Train during this window.<br>${gymDetail(day)}<br>${kegelDetail()}`,false);
+ } else if(!isRest){
+  war+=makeItem("8:30","Active recovery / mobility",[["Rest","tg-rest"]],
+   `Light walk, foam rolling, stretching. No heavy loading today.`,false);
+ } else {
+  war+=makeItem("8:30","Rest — light movement optional",[["Rest","tg-rest"]],
+   `30 min walk, yoga, or mobility work. Allow muscle repair and hormonal recovery.`,false);
+ }
+
+ if(isTrade){
+  war+=makeItem("9:15","Pre-market scan — Nifty / BankNifty",[["Trading","tg-trade"]],
+   `Option chain analysis · PCR · key OI levels · support/resistance. Plan your trade before the bell. The warrior enters battle with a strategy, not a gamble.`,false);
+  war+=makeItem("9:15","Live F&O trading session",[["Trading","tg-trade"]],
+   `Execute the plan. Journal every trade in real time. Cut losses without emotion — the warrior who can't retreat dies.`,false);
+  war+=makeItem("11:30","Post-trade debrief + journal",[],
+   `What worked · what didn't · P&L logged. Close the trading chapter before Deloitte work begins.`,false);
+ }
+ war+=makeItem("12:30","Lunch + Ashwagandha — Dose 1",[["Supplement","tg-supp"]],
+  `Ashwagandha KSM-66: 250 mg with food. Cortisol suppression mid-day — keeps the warrior sharp, not reactive.<br>
+  <i>Take with a meal containing dietary fat — fat-soluble absorption. Avoid caffeine within 60 min.</i>`,false);
+ war+=makeItem("1:00","Deep work — Deloitte / SDET / builds",[["Work","tg-work"]],
+  `Automation, SIGMA-QT dev, client deliverables. Time-block by task. 90-min focus sprints → 10 min break. No multitasking.`,false);
+ war+=makeItem("5:00","Wrap — Deloitte EOD review",[],
+  `Close all loops. Write tomorrow's top 3 tasks. The warrior sheathes the sword cleanly.`,false);
+ war+=makeItem("5:30","Walk — 30 min, no earphones",[],
+  `Decompression buffer between Warrior and King mode. Sunlight exposure = extra D3 synthesis bonus.`,false);
+
+ html+=`<div class="phase ph-war" id="ph-war-${day.id}">
+  <div class="phase-hdr" onclick="togglePhase('ph-war-${day.id}')">
+   <div class="phase-icon">⚔️</div>
+   <div class="phase-meta"><div class="phase-name">Warrior</div><div class="phase-sub">Execution · Discipline · Battle mode</div></div>
+   <div class="phase-time">8:30 AM–6:00 PM</div>
+   <span class="phase-chv open" id="chv-ph-war-${day.id}">▼</span>
+  </div>
+  <div class="phase-body open" id="body-ph-war-${day.id}">${war}
+   <div style="padding:8px 14px 10px">
+    <div class="mantras"><span class="mantra">execute the plan</span><span class="mantra">no multitasking</span><span class="mantra">deep work only</span><span class="mantra">warriors finish what they start</span></div>
+   </div>
+  </div>
+ </div>`;
+
+ // ─── KING ───────────────────────────────────────────────────
+ let king="";
+ king+=makeItem("6:00",`Strategic learning + MBA`,[["MBA","tg-mba"]],
+  `ZG515 Consulting skills · SMBP case studies · market research.<br>Kings study at night — they govern in the day.`,false);
+ king+=makeItem("7:15","Dinner — high protein, no junk",[],
+  `Eggs · paneer · chicken · legumes. Protein = raw material for testosterone synthesis overnight.<br>
+  <i>Avoid calcium-rich dairy in this meal if it's within 2 hrs of Zinc dose at 9:30 PM.</i>`,false);
+ king+=makeItem("8:00","Partner + family — screens off",[],
+  `Relationships are the king's kingdom. Presence is the currency. 1 hour of full attention.`,false);
+ king+=makeItem("9:00","Night reading — 30 min",[],
+  `Books only. No doom scrolling. Biographies, philosophy, markets. Kings consume wisdom, not content.`,false);
+ king+=makeItem("9:30","Night supplement stack",[["Supplement","tg-supp"]],
+  `<b>Zinc Picolinate:</b> 30 mg — boosts nocturnal testosterone surge in deep sleep.<br>
+  <b>Ashwagandha Dose 2:</b> 250 mg — lowers cortisol for deep sleep; 250+250 split outperforms single 500 mg dose.<br>
+  <b>Gokshura Dose 2:</b> 250 mg — sustains LH pulse throughout sleep. Total daily: 500 mg.<br>
+  <i>Avoid calcium-rich foods 2 hrs before Zinc. Take post-dinner — light meal or with small snack.</i>`,false);
+ king+=makeItem("9:45","Day review — 10 minutes",[],
+  `1 win · 1 failure · 1 intention for tomorrow. The king audits the kingdom every night.`,false);
+ if(isSun){
+  king+=makeItem("12:00","Vitamin D3 — 60,000 IU (Sunday lunch)",[["Supplement","tg-supp"],["Weekly","tg-mba"]],
+   `1 sachet/capsule with your heaviest fatty meal of the week. D3 is fat-soluble — never on empty stomach.<br>
+   <span class="tag tg-warn">Do NOT take daily — hypercalcemia risk</span><br>
+   <i>After 8–12 weeks switch to maintenance 1,000–2,000 IU daily as per doctor.</i>`,false);
+ }
+ king+=makeItem("10:00","Sleep — 7 hrs minimum",[],
+  `<div class="sleep-bar"><div class="sleep-title">10:00 PM → 5:00 AM · The testosterone forge</div>Zinc + Ashwagandha + Gokshura all peak during Stage 3 sleep. Shilajit's fulvic acid repairs cellular ATP overnight. This is not rest — this is production.</div>`,false);
+
+ html+=`<div class="phase ph-king" id="ph-king-${day.id}">
+  <div class="phase-hdr" onclick="togglePhase('ph-king-${day.id}')">
+   <div class="phase-icon">👑</div>
+   <div class="phase-meta"><div class="phase-name">King</div><div class="phase-sub">Strategy · Legacy · Governance of self</div></div>
+   <div class="phase-time">6:00–10:00 PM</div>
+   <span class="phase-chv open" id="chv-ph-king-${day.id}">▼</span>
+  </div>
+  <div class="phase-body open" id="body-ph-king-${day.id}">${king}
+   <div style="padding:8px 14px 10px">
+    <div class="mantras"><span class="mantra">strategy over hustle</span><span class="mantra">protect the kingdom</span><span class="mantra">sleep = testosterone factory</span><span class="mantra">review · refine · rule</span></div>
+   </div>
+  </div>
+ </div>`;
+ return html;
+}
+
+function togglePhase(id){
+ const b=document.getElementById("body-"+id);
+ const c=document.getElementById("chv-"+id);
+ if(!b)return;
+ const open=b.classList.toggle("open");
+ if(c)c.classList.toggle("open",open);
+}
+function toggleItem(uid){
+ const el=document.getElementById(uid);
+ if(!el)return;
+ el.classList.toggle("open");
+ el.closest(".item").classList.toggle("active-item",el.classList.contains("open"));
+}
+
+const tabs=document.getElementById("tabs");
+const content=document.getElementById("content");
+let active="Mon";
+DAYS.forEach(day=>{
+ const t=document.createElement("button");
+ t.className="tab"+(day.id===active?" active":"");
+ t.textContent=day.label+(day.sun?" ☀":"")+(day.rest?" ·rest":"");
+ t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  active=day.id;
+  content.innerHTML=renderDay(day);
+ };
+ tabs.appendChild(t);
+});
+content.innerHTML=renderDay(DAYS[0]);
+</script>
