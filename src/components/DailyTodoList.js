@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import TaskCard from './TaskCard';
 
-const DailyTodoList = ({ allTodos, completedTodos, onAdd, onDelete, onComplete, onDeleteCompleted }) => {
+const DailyTodoList = ({ allTodos, completedTodos, parentTitle, onAdd, onDelete, onComplete, onDeleteCompleted }) => {
   const [activeTab, setActiveTab] = useState('todo');
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -20,6 +20,15 @@ const DailyTodoList = ({ allTodos, completedTodos, onAdd, onDelete, onComplete, 
 
   return (
     <div className="todo-section">
+      <div className="goal-panel-header">
+        <h2 className="goal-panel-title">
+          <span className="goal-panel-icon">✅</span>
+          Daily Tasks
+        </h2>
+        <span className="goal-panel-count">{allTodos.length + completedTodos.length}</span>
+      </div>
+      {parentTitle && <p className="goal-panel-parent">For: {parentTitle}</p>}
+
       <div className="todo-input-area">
         <div className="input-group">
           <input

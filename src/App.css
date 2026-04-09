@@ -25,7 +25,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -144,6 +144,232 @@
 /* ========== TODO INPUT ========== */
 .todo-section {
   margin-top: 8px;
+}
+
+/* ========== PLANNER NAV / BREADCRUMBS ========== */
+.planner-nav {
+  margin-bottom: 20px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.breadcrumb-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all var(--transition);
+}
+
+.breadcrumb-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+.breadcrumb-btn--active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.breadcrumb-sep {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.level-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.level-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all var(--transition);
+}
+
+.level-pill--active {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border-color: rgba(0, 230, 122, 0.3);
+}
+
+/* ========== GOAL PANELS ========== */
+.goal-panel {
+  margin-top: 8px;
+}
+
+.goal-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.goal-panel-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.goal-panel-icon {
+  font-size: 20px;
+}
+
+.goal-panel-count {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+.goal-panel-parent {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: -8px 0 16px;
+  padding-left: 2px;
+}
+
+.goal-input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.goal-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.goal-input::placeholder {
+  color: var(--text-muted);
+}
+
+.goal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.goal-add-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  flex-shrink: 0;
+}
+
+.goal-add-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.goal-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.goal-item:hover {
+  background: var(--bg-card-hover);
+  border-color: #3a3a42;
+}
+
+.goal-item--selected {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.goal-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-item-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: block;
+}
+
+.goal-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.goal-item-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+  transition: color var(--transition);
+}
+
+.goal-item:hover .goal-item-arrow {
+  color: var(--accent);
 }
 
 .todo-input-area {
@@ -454,5 +680,18 @@
 
   .task-desc {
     margin-left: 0;
+  }
+
+  .level-pills {
+    flex-wrap: wrap;
+  }
+
+  .level-pill {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .goal-item {
+    padding: 12px 14px;
   }
 }

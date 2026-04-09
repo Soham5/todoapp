@@ -20,3 +20,61 @@ export const getStreakMessage = (percentage) => {
   if (percentage > 0) return "You've begun — every step counts!";
   return "Add some tasks to get started!";
 };
+
+export const getGoalProgress = (yearlyGoals) => {
+  let totalTasks = 0;
+  let completedTasks = 0;
+
+  yearlyGoals.forEach((yg) => {
+    (yg.monthlyGoals || []).forEach((mg) => {
+      (mg.weeklyGoals || []).forEach((wg) => {
+        const daily = wg.dailyTasks || [];
+        const done = wg.completedTasks || [];
+        totalTasks += daily.length + done.length;
+        completedTasks += done.length;
+      });
+    });
+  });
+
+  return {
+    total: totalTasks,
+    completed: completedTasks,
+    pending: totalTasks - completedTasks,
+    percentage: calculateProgress(totalTasks, completedTasks),
+  };
+};
+
+export const getYearlyProgress = (yearlyGoal) => {
+  if (!yearlyGoal) return { total: 0, completed: 0, pending: 0, percentage: 0 };
+  let totalTasks = 0;
+  let completedTasks = 0;
+  (yearlyGoal.monthlyGoals || []).forEach((mg) => {
+    (mg.weeklyGoals || []).forEach((wg) => {
+      totalTasks += (wg.dailyTasks || []).length + (wg.completedTasks || []).length;
+      completedTasks += (wg.completedTasks || []).length;
+    });
+  });
+  return { total: totalTasks, completed: completedTasks, pending: totalTasks - completedTasks, percentage: calculateProgress(totalTasks, completedTasks) };
+};
+
+export const getMonthlyProgress = (monthlyGoal) => {
+  if (!monthlyGoal) return { total: 0, completed: 0, pending: 0, percentage: 0 };
+  let totalTasks = 0;
+  let completedTasks = 0;
+  (monthlyGoal.weeklyGoals || []).forEach((wg) => {
+    totalTasks += (wg.dailyTasks || []).length + (wg.completedTasks || []).length;
+    completedTasks += (wg.completedTasks || []).length;
+  });
+  return { total: totalTasks, completed: completedTasks, pending: totalTasks - completedTasks, percentage: calculateProgress(totalTasks, completedTasks) };
+};
+
+export const getWeeklyProgress = (weeklyGoal) => {
+  if (!weeklyGoal) return { total: 0, completed: 0, pending: 0, percentage: 0 };
+  const daily = weeklyGoal.dailyTasks || [];
+  const done = weeklyGoal.completedTasks || [];
+  const total = daily.length + done.length;
+  return { total, completed: done.length, pending: daily.length, percentage: calculateProgress(total, done.length) };
+};
+
+let _idCounter = Date.now();
+export const genId = () => String(_idCounter++);
