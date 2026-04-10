@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import PlannerBoard from './components/PlannerBoard';
 import ProgressBar from './components/ProgressBar';
+import AllDailyTasks from './components/AllDailyTasks';
 import YearlyGoals from './components/YearlyGoals';
 import MonthlyGoals from './components/MonthlyGoals';
 import WeeklyGoals from './components/WeeklyGoals';
@@ -12,7 +13,7 @@ const STORAGE_KEY = 'goalData';
 
 function App() {
   const [yearlyGoals, setYearlyGoals] = useState([]);
-  const [activeLevel, setActiveLevel] = useState('yearly');
+  const [activeLevel, setActiveLevel] = useState('all-daily');
   const [selectedYearly, setSelectedYearly] = useState(null);
   const [selectedMonthly, setSelectedMonthly] = useState(null);
   const [selectedWeekly, setSelectedWeekly] = useState(null);
@@ -22,10 +23,53 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, []);
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved) setYearlyGoals(saved);
+  // Clear all completedTasks across the goal tree
+  const clearAllCompleted = useCallback((data) => {
+    return data.map((yg) => ({
+      ...yg,
+      monthlyGoals: (yg.monthlyGoals || []).map((mg) => ({
+        ...mg,
+        weeklyGoals: (mg.weeklyGoals || []).map((wg) => ({
+          ...wg,
+          completedTasks: [],
+        })),
+      })),
+    }));
   }, []);
+
+  useEffect(() => {
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) {
+      // Check if day changed — clear completed tasks
+      const savedDate = localStorage.getItem('goalDate');
+      const todayStr = new Date().toDateString();
+      if (savedDate !== todayStr) {
+        saved = clearAllCompleted(saved);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+        localStorage.setItem('goalDate', todayStr);
+      }
+      setYearlyGoals(saved);
+    } else {
+      localStorage.setItem('goalDate', new Date().toDateString());
+    }
+  }, [clearAllCompleted]);
+
+  // Midnight auto-clear while app is open
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const timer = setTimeout(() => {
+      setYearlyGoals((prev) => {
+        const cleared = clearAllCompleted(prev);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleared));
+        localStorage.setItem('goalDate', new Date().toDateString());
+        return cleared;
+      });
+    }, tomorrow - now);
+    return () => clearTimeout(timer);
+  }, [clearAllCompleted]);
 
   // Helper to get nested objects
   const getYearlyGoal = () => yearlyGoals.find((g) => g.id === selectedYearly);
@@ -195,10 +239,73 @@ function App() {
     }));
   };
 
+  // === CROSS-GOAL operations (for AllDailyTasks view) ===
+  const completeTaskByPath = (ygId, mgId, wgId, taskIndex) => {
+    const now = new Date();
+    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const updated = yearlyGoals.map((yg) =>
+      yg.id === ygId
+        ? {
+            ...yg,
+            monthlyGoals: (yg.monthlyGoals || []).map((mg) =>
+              mg.id === mgId
+                ? {
+                    ...mg,
+                    weeklyGoals: (mg.weeklyGoals || []).map((wg) =>
+                      wg.id === wgId
+                        ? {
+                            ...wg,
+                            dailyTasks: (wg.dailyTasks || []).filter((_, i) => i !== taskIndex),
+                            completedTasks: [
+                              ...(wg.completedTasks || []),
+                              { ...(wg.dailyTasks || [])[taskIndex], completedAt: time },
+                            ],
+                          }
+                        : wg
+                    ),
+                  }
+                : mg
+            ),
+          }
+        : yg
+    );
+    setYearlyGoals(updated);
+    save(updated);
+  };
+
+  const deleteTaskByPath = (ygId, mgId, wgId, taskIndex, isCompleted) => {
+    const updated = yearlyGoals.map((yg) =>
+      yg.id === ygId
+        ? {
+            ...yg,
+            monthlyGoals: (yg.monthlyGoals || []).map((mg) =>
+              mg.id === mgId
+                ? {
+                    ...mg,
+                    weeklyGoals: (mg.weeklyGoals || []).map((wg) =>
+                      wg.id === wgId
+                        ? {
+                            ...wg,
+                            ...(isCompleted
+                              ? { completedTasks: (wg.completedTasks || []).filter((_, i) => i !== taskIndex) }
+                              : { dailyTasks: (wg.dailyTasks || []).filter((_, i) => i !== taskIndex) }),
+                          }
+                        : wg
+                    ),
+                  }
+                : mg
+            ),
+          }
+        : yg
+    );
+    setYearlyGoals(updated);
+    save(updated);
+  };
+
   // Navigation
   const navigateTo = (level) => {
     setActiveLevel(level);
-    if (level === 'yearly') {
+    if (level === 'all-daily' || level === 'yearly') {
       setSelectedYearly(null);
       setSelectedMonthly(null);
       setSelectedWeekly(null);
@@ -212,7 +319,10 @@ function App() {
 
   // Breadcrumbs
   const buildBreadcrumbs = () => {
-    const crumbs = [{ level: 'yearly', label: 'Yearly Goals' }];
+    const crumbs = [{ level: 'all-daily', label: 'All Tasks' }];
+    if (activeLevel !== 'all-daily') {
+      crumbs.push({ level: 'yearly', label: 'Yearly Goals' });
+    }
     if (selectedYearly) {
       const yg = getYearlyGoal();
       crumbs.push({ level: 'monthly', label: yg?.title || 'Monthly' });
@@ -232,6 +342,8 @@ function App() {
   const wg = getWeeklyGoal();
   const getLevelProgress = () => {
     switch (activeLevel) {
+      case 'all-daily': return { stats: getGoalProgress(yearlyGoals), label: "Today's Tasks" };
+      case 'yearly': return { stats: getGoalProgress(yearlyGoals), label: 'Overall Goal Progress' };
       case 'monthly': return { stats: getYearlyProgress(getYearlyGoal()), label: 'Yearly Goal Progress' };
       case 'weekly': return { stats: getMonthlyProgress(getMonthlyGoal()), label: 'Monthly Goal Progress' };
       case 'daily': return { stats: getWeeklyProgress(wg), label: 'Weekly Goal Progress' };
@@ -251,6 +363,20 @@ function App() {
           <h1 className="app-title">Goal Planner</h1>
           <p className="app-date">{today}</p>
         </div>
+        <div className="view-toggle">
+          <button
+            className={`view-toggle-btn ${activeLevel === 'all-daily' ? 'view-toggle-btn--active' : ''}`}
+            onClick={() => navigateTo('all-daily')}
+          >
+            Tasks
+          </button>
+          <button
+            className={`view-toggle-btn ${activeLevel !== 'all-daily' ? 'view-toggle-btn--active' : ''}`}
+            onClick={() => navigateTo('yearly')}
+          >
+            Goals
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
@@ -261,6 +387,14 @@ function App() {
           breadcrumbs={buildBreadcrumbs()}
           onNavigate={navigateTo}
         />
+
+        {activeLevel === 'all-daily' && (
+          <AllDailyTasks
+            yearlyGoals={yearlyGoals}
+            onComplete={completeTaskByPath}
+            onDelete={deleteTaskByPath}
+          />
+        )}
 
         {activeLevel === 'yearly' && (
           <YearlyGoals

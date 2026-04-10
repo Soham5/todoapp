@@ -1,8 +1,9 @@
 import React from 'react';
 
 
-const LEVELS = ['yearly', 'monthly', 'weekly', 'daily'];
+const LEVELS = ['all-daily', 'yearly', 'monthly', 'weekly', 'daily'];
 const LEVEL_LABELS = {
+  'all-daily': 'All Tasks',
   yearly: 'Yearly Goals',
   monthly: 'Monthly Goals',
   weekly: 'Weekly Goals',
