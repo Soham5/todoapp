@@ -317,12 +317,9 @@ function App() {
     }
   };
 
-  // Breadcrumbs
+  // Breadcrumbs — only for goals view
   const buildBreadcrumbs = () => {
-    const crumbs = [{ level: 'all-daily', label: 'All Tasks' }];
-    if (activeLevel !== 'all-daily') {
-      crumbs.push({ level: 'yearly', label: 'Yearly Goals' });
-    }
+    const crumbs = [{ level: 'yearly', label: 'Yearly Goals' }];
     if (selectedYearly) {
       const yg = getYearlyGoal();
       crumbs.push({ level: 'monthly', label: yg?.title || 'Monthly' });
@@ -382,17 +379,19 @@ function App() {
       <main className="app-main">
         <ProgressBar stats={currentProgress} label={progressLabel} />
 
-        <PlannerBoard
-          activeLevel={activeLevel}
-          breadcrumbs={buildBreadcrumbs()}
-          onNavigate={navigateTo}
-        />
-
         {activeLevel === 'all-daily' && (
           <AllDailyTasks
             yearlyGoals={yearlyGoals}
             onComplete={completeTaskByPath}
             onDelete={deleteTaskByPath}
+          />
+        )}
+
+        {activeLevel !== 'all-daily' && (
+          <PlannerBoard
+            activeLevel={activeLevel}
+            breadcrumbs={buildBreadcrumbs()}
+            onNavigate={navigateTo}
           />
         )}
 
@@ -437,6 +436,7 @@ function App() {
             onDelete={deleteDailyTask}
             onComplete={completeDailyTask}
             onDeleteCompleted={deleteCompletedTask}
+            showCompletion={false}
           />
         )}
       </main>
