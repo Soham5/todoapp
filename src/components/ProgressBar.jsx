@@ -1,13 +1,13 @@
 import React from 'react';
 import { getStreakMessage } from '../utils/progressCalculator';
 
-const ProgressBar = ({ stats }) => {
+const ProgressBar = ({ stats, label }) => {
   const { total, completed, pending, percentage } = stats;
 
   return (
     <div className="progress-section">
       <div className="progress-header">
-        <h2 className="progress-title">Today's Progress</h2>
+        <h2 className="progress-title">{label || 'Overall Progress'}</h2>
         <span className="progress-percentage">{percentage}%</span>
       </div>
 

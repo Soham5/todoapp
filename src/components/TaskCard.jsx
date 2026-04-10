@@ -2,7 +2,7 @@ import React from 'react';
 import { MdDeleteOutline } from 'react-icons/md';
 import { FaCheck } from 'react-icons/fa';
 
-const TaskCard = ({ item, index, onDelete, onComplete, isCompleted }) => {
+const TaskCard = ({ item, index, onDelete, onComplete, isCompleted, showCompletion = true }) => {
   return (
     <div className={`task-card ${isCompleted ? 'task-card--completed' : ''}`}>
       <div className="task-card-content">
@@ -17,7 +17,7 @@ const TaskCard = ({ item, index, onDelete, onComplete, isCompleted }) => {
       </div>
 
       <div className="task-card-actions">
-        {!isCompleted && (
+        {!isCompleted && showCompletion && (
           <button
             className="action-btn action-btn--complete"
             onClick={() => onComplete(index)}
